@@ -1,0 +1,30 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,700;1,700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Playfair Display", serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  /* North Patagonia & Alto Valle Palette */
+  --color-patagonia-sky: #00AEEF;
+  --color-patagonia-red: #D21F3C;
+  --color-patagonia-yellow: #F9ED32;
+  --color-valle-green: #4F7942;
+  --color-valle-wine: #722F37;
+  --color-valle-earth: #8B4513;
+  --color-valle-sand: #F5F2ED;
+  --color-valle-stone: #2C2C2C;
+}
+
+@layer base {
+  html, body {
+    @apply overflow-x-hidden;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    word-break: break-word;
+  }
+  body {
+    @apply bg-valle-sand text-valle-stone;
+  }
+}
