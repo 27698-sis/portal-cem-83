@@ -1,0 +1,126 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: notificaciones
+    // Document ID: auto-generated
+    // Fields:
+    //   - titulo: string (required) - El título de la notificación.
+    //   - mensaje: string (required) - El contenido de la notificación.
+    //   - fecha: string (required) - La fecha de la notificación.
+    //   - activa: bool (required) - Indica si la notificación está activa.
+    //
+    // Collection: planificaciones
+    // Document ID: auto-generated
+    // Fields:
+    //   - teacherName: string (required)
+    //   - module: string (required)
+    //   - cycleYear: string (required)
+    //   - status: string (required, enum: ["Pendiente", "Observado", "Aprobado"])
+    //   - timestamp: number (required)
+    //   - data: map (required)
+    //   - observations: list (optional)
+    //
+    // Collection: configuracion
+    // Document ID: access_codes
+    // Fields:
+    //   - docentes: string
+    //   - preceptoria: string
+    //   - directivo: string
+    //   - coordinacion: string
+    //
+    // Collection: estudiantes
+    // Document ID: auto-generated
+    // Fields:
+    //   - name: string (required)
+    //   - course: string (required)
+    //   - division: string (optional)
+    //   - status: string (required, enum: ["SI", "NO", "PENDIENTE"])
+    //
+    // Collection: users
+    // Document ID: uid
+    // Fields:
+    //   - email: string (required)
+    //   - role: string (required, enum: ["admin", "docente", "preceptor", "directivo", "coordinador"])
+    //   - uid: string (required)
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function hasRole(role) {
+      return isAuthenticated() && (getUserData().role == role || isAdmin());
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && getUserData().role == 'admin' ||
+          (request.auth.token.email == "gestonm36@gmail.com" && request.auth.token.email_verified == true));
+    }
+
+    function isValidNotificacion(data) {
+      return data.keys().hasAll(['titulo', 'mensaje', 'fecha', 'activa']) &&
+             data.titulo is string && data.titulo.size() > 0 && data.titulo.size() < 100 &&
+             data.mensaje is string && data.mensaje.size() > 0 && data.mensaje.size() < 1000 &&
+             data.fecha is string && data.activa is bool;
+    }
+
+    function isValidPlanificacion(data) {
+      return data.keys().hasAll(['teacherName', 'module', 'cycleYear', 'status', 'timestamp', 'data']) &&
+             data.teacherName is string && data.teacherName.size() > 0 &&
+             data.module is string &&
+             data.cycleYear is string &&
+             data.status in ["Pendiente", "Observado", "Aprobado"] &&
+             data.timestamp is number &&
+             data.data is map;
+    }
+
+    function isValidEstudiante(data) {
+      return data.keys().hasAll(['name', 'course', 'status']) &&
+             data.name is string && data.name.size() > 0 &&
+             data.course is string &&
+             data.status in ["SI", "NO", "PENDIENTE"];
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /notificaciones/{notifId} {
+      allow read: if true;
+      allow write: if true; // Allow for now for testing, or keep restricted if only reading is needed
+    }
+
+    match /planificaciones/{planId} {
+      allow read, write: if true;
+    }
+
+    match /configuracion/{configId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    match /estudiantes/{estId} {
+      allow read, write: if true;
+    }
+
+    match /users/{userId} {
+      allow read: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
+      allow create: if isAuthenticated() && request.auth.uid == userId && request.resource.data.role == 'docente';
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+  }
+}

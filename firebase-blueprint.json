@@ -1,0 +1,109 @@
+{
+  "entities": {
+    "Notificacion": {
+      "title": "Notificación",
+      "description": "Una notificación pública para los estudiantes.",
+      "type": "object",
+      "properties": {
+        "titulo": {
+          "type": "string",
+          "description": "El título de la notificación."
+        },
+        "mensaje": {
+          "type": "string",
+          "description": "El contenido de la notificación."
+        },
+        "fecha": {
+          "type": "string",
+          "description": "La fecha de la notificación."
+        },
+        "activa": {
+          "type": "boolean",
+          "description": "Indica si la notificación está activa y debe mostrarse."
+        }
+      },
+      "required": ["titulo", "mensaje", "fecha", "activa"]
+    },
+    "Planificacion": {
+      "title": "Planificación",
+      "description": "Una planificación presentada por un docente.",
+      "type": "object",
+      "properties": {
+        "teacherName": { "type": "string" },
+        "module": { "type": "string" },
+        "cycleYear": { "type": "string" },
+        "status": { "type": "string", "enum": ["Pendiente", "Observado", "Aprobado"] },
+        "timestamp": { "type": "number" },
+        "data": { "type": "object" },
+        "observations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "date": { "type": "number" },
+              "text": { "type": "string" },
+              "author": { "type": "string" }
+            }
+          }
+        }
+      },
+      "required": ["teacherName", "module", "cycleYear", "status", "timestamp", "data"]
+    },
+    "Configuracion": {
+      "title": "Configuración",
+      "description": "Configuración global de la plataforma, como códigos de acceso.",
+      "type": "object",
+      "properties": {
+        "docentes": { "type": "string" },
+        "preceptoria": { "type": "string" },
+        "directivo": { "type": "string" },
+        "coordinacion": { "type": "string" }
+      }
+    },
+    "Estudiante": {
+      "title": "Estudiante",
+      "description": "Datos de un estudiante.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "course": { "type": "string" },
+        "division": { "type": "string" },
+        "status": { "type": "string", "enum": ["SI", "NO", "PENDIENTE"] }
+      },
+      "required": ["name", "course", "status"]
+    },
+    "User": {
+      "title": "User",
+      "description": "Datos de un usuario de la plataforma.",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string" },
+        "role": { "type": "string", "enum": ["admin", "docente", "preceptor", "directivo", "coordinador"] },
+        "uid": { "type": "string" }
+      },
+      "required": ["email", "role", "uid"]
+    }
+  },
+  "firestore": {
+    "notificaciones": {
+      "schema": "Notificacion",
+      "description": "Colección de notificaciones públicas."
+    },
+    "planificaciones": {
+      "schema": "Planificacion",
+      "description": "Colección de planificaciones docentes."
+    },
+    "configuracion": {
+      "schema": "Configuracion",
+      "description": "Configuración del sistema."
+    },
+    "estudiantes": {
+      "schema": "Estudiante",
+      "description": "Nómina de estudiantes."
+    },
+    "users": {
+      "schema": "User",
+      "description": "Colección de usuarios y sus roles."
+    }
+  }
+}
